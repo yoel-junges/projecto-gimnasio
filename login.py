@@ -1,10 +1,10 @@
 import tkinter as tk
 from tkinter import messagebox
-from clases import Persona, usuarios
+from clases import Persona, usuarios, Turno
 from pantalla_principal import pantalla_principal
 
 
-# Función para manejar el login
+# Función para manejar el logins
 def login():
     usuario_nombre = entry_usuario.get()
     contraseña = entry_clave.get()

@@ -1,8 +1,8 @@
+
 usuarios_archivo = 'usuarios.txt'
 turnos_archivo = 'turnos.txt'
 usuarios = []  # Lista global para almacenar los usuarios
 turnos = []  # Lista para guardar los turnos
-ultimo_id = 0  # Variable global para mantener el último ID generado
 
 class Persona:
     def __init__(self, nombre, apellido, edad, dni, telefono, usuario, contraseña, funcion):
@@ -53,7 +53,6 @@ class Turno:
 
     @staticmethod
     def alta(nombre, instructor, horario, capacidad):
-        # Generar ID automáticamente
         Turno.ultimo_id += 1
         nuevo_turno = Turno(Turno.ultimo_id, nombre, instructor, horario, capacidad)
         turnos.append(nuevo_turno)
@@ -83,29 +82,24 @@ class Turno:
             archivo.write(f"ultimo_id:{Turno.ultimo_id}\n")
             for t in turnos:
                 archivo.write(f"{t.id},{t.nombre},{t.instructor},{t.horario},{t.capacidad}\n")
-    
+
     @staticmethod
     def cargar_datos():
-        global turnos, ultimo_id
+        global turnos
         turnos = []
         try:
             with open(turnos_archivo, 'r') as archivo:
-                # Leer y establecer ultimo_id
                 primera_linea = archivo.readline().strip()
                 if primera_linea.startswith("ultimo_id:"):
-                    ultimo_id = int(primera_linea.split(':')[1])
+                    Turno.ultimo_id = int(primera_linea.split(':')[1])
                 else:
-                    ultimo_id = 0
+                    Turno.ultimo_id = 0
 
                 for linea in archivo:
                     id, nombre, instructor, horario, capacidad = linea.strip().split(',')
                     turnos.append(Turno(int(id), nombre, instructor, horario, int(capacidad)))
-                    # Mantener actualizado el ultimo_id
-                    if int(id) > ultimo_id:
-                        ultimo_id = int(id)
         except FileNotFoundError:
-            turnos = []
-            ultimo_id = 0
+            Turno.ultimo_id = 0
             print("No se encontró el archivo. Lista de turnos vacía.")
         except ValueError:
             print("Error en el formato del archivo de turnos.")
