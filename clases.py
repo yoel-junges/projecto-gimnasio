@@ -56,7 +56,7 @@ class Turno:
         Turno.ultimo_id += 1
         nuevo_turno = Turno(Turno.ultimo_id, nombre, instructor, horario, capacidad)
         turnos.append(nuevo_turno)
-        Turno.guardar_datos()
+        return nuevo_turno
 
     @staticmethod
     def baja(nombre):
