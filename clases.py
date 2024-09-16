@@ -59,10 +59,16 @@ class Turno:
         return nuevo_turno
 
     @staticmethod
-    def baja(nombre):
-        global turnos
-        turnos = [t for t in turnos if t.nombre != nombre]
-        Turno.guardar_datos()
+    def baja(turno_id):
+        turno_id = str(turno_id)  # Convertir el turno_id a string para compararlo
+        with open('turnos.txt', 'r') as file:
+            lineas = file.readlines()
+
+        with open('turnos.txt', 'w') as file:
+            for linea in lineas:
+                datos_turno = linea.strip().split(',')  # Asumiendo que los turnos están separados por comas
+                if datos_turno[0] != turno_id:  # Comparar con el ID del turno
+                    file.write(linea)
 
     @staticmethod
     def modificacion(nombre, nuevo_instructor=None, nuevo_horario=None, nueva_capacidad=None):
