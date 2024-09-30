@@ -1,8 +1,11 @@
 
+
+reservas_archivo = 'reservas.txt'
 usuarios_archivo = 'usuarios.txt'
 turnos_archivo = 'turnos.txt'
 usuarios = []  # Lista global para almacenar los usuarios
 turnos = []  # Lista para guardar los turnos
+reservas = []
 
 class Persona:
     def __init__(self, nombre, apellido, edad, dni, telefono, usuario, contraseña, funcion):
@@ -14,6 +17,7 @@ class Persona:
         self.usuario = usuario
         self.contraseña = contraseña
         self.funcion = funcion
+        
 
     @staticmethod
     def agregar_usuario(usuario):
@@ -50,6 +54,8 @@ class Turno:
         self.instructor = instructor
         self.horario = horario
         self.capacidad = capacidad
+        self.estado = False
+        
 
     @staticmethod
     def alta(nombre, instructor, horario, capacidad):
@@ -110,8 +116,48 @@ class Turno:
         except ValueError:
             print("Error en el formato del archivo de turnos.")
 
+
+class Reservas:
+    def __init__(self,usuario_dni, turno_id):
+        self.turno_id = turno_id
+        self.usuario_dni = usuario_dni
+
+    @staticmethod
+    def cargar_reservas():
+        """Cargar todas las reservas desde el archivo."""
+        reservas = []
+        try:
+            with open('reservas.txt', 'r') as f:
+                for linea in f:
+                    usuario_dni, turno_id = linea.strip().split(',')
+                    reservas.append(Reservas(usuario_dni , int(turno_id))) 
+        except FileNotFoundError:
+            pass  
+        return reservas
+
+    @staticmethod
+    def guardar_reserva(reserva):
+        """Guardar una nueva reserva en el archivo."""
+        with open(reservas_archivo , 'a') as f:
+            f.write(f"{reserva.usuario_dni},{reserva.turno_id}\n")
+
+    @staticmethod
+    def verificar_reserva(usuario_dni, turno_id):
+        """Verificar si el usuario ya ha reservado ese turno."""
+        reservas = Reservas.cargar_reservas()  
+        for reserva in reservas:
+            if reserva.usuario_dni == usuario_dni and reserva.turno_id == turno_id:
+                return True
+        return False
+
+    @staticmethod
+    def obtener_turnos_reservados(usuario_dni):
+        """Obtener los IDs de los turnos reservados por un usuario."""
+        reservas = Reservas.cargar_reservas()  
+        return [int(reserva.turno_id) for reserva in reservas if reserva.usuario_dni == usuario_dni]
+
 # Inicializar cargando los datos
 Turno.cargar_datos()
-
-
+Reservas.cargar_reservas
+    
 

@@ -1,10 +1,10 @@
 import tkinter as tk
 from tkinter import messagebox
-from clases import Persona, usuarios, Turno
+from clases import Persona, usuarios
 from pantalla_principal import pantalla_principal
+from datetime import datetime
 
-
-# Función para manejar el logins
+# Función para manejar el login
 def login():
     usuario_nombre = entry_usuario.get()
     contraseña = entry_clave.get()
@@ -60,6 +60,18 @@ def limpiar_campos_registro():
     # Establecer el foco en el primer campo de entrada
     entry_nombre.focus_set()
 
+
+# Función para actualizar la hora y fecha en la etiqueta
+def actualizar_fecha_hora():
+    # Obtener la fecha y hora actual de la computadora
+    fecha_hora_actual = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    # Actualizar el texto de la etiqueta
+    etiqueta_fecha_hora.config(text=fecha_hora_actual)
+    
+    # Llamar a la función cada 1000 ms (1 segundo) para actualizar la hora
+    pantalla_login.after(1000, actualizar_fecha_hora)
+
+    
 # Ventana login de la aplicación
 pantalla_login = tk.Tk()
 pantalla_login.title('Login')
@@ -139,5 +151,13 @@ menu_funcion.pack()
 boton_registrar = tk.Button(ventana_registro, text="Registrar", command=registrar_usuario)
 boton_registrar.pack()
 
+# Crear una etiqueta para mostrar la fecha y hora
+etiqueta_fecha_hora = tk.Label(pantalla_login, font=('Arial', 14))
+
+# Posicionar la etiqueta en la parte inferior derecha de la ventana
+etiqueta_fecha_hora.place(relx=1.0, rely=1.0, anchor='se', x=-10, y=-10)  # -10 px de margen
+
+# Llamar a la función por primera vez para iniciar la actualización
+actualizar_fecha_hora()
 # Iniciar la aplicación Tkinter
 pantalla_login.mainloop()
