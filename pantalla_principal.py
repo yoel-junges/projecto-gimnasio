@@ -1,6 +1,7 @@
 import tkinter as tk
-from tkinter import messagebox, ttk, simpledialog
+from tkinter import messagebox, ttk
 from clases import Turno, turnos, Reservas
+import pdb 
 
 
 def pantalla_principal(usuario):
@@ -21,13 +22,15 @@ def pantalla_principal(usuario):
 
 
         def actualizar_lista_turnos():
+            
             """Función para actualizar la lista de turnos en el Treeview."""
             # Limpiar la lista actual
             for item in tree.get_children():
                 tree.delete(item)
-
+            
             # Insertar los turnos actuales
             for t in turnos:
+                
                 tree.insert("", tk.END, values=(str(t.id), t.nombre, t.instructor, str(t.horario), str(t.capacidad)))
 
         def agregar_turno_a_treeview(turno):
@@ -82,21 +85,8 @@ def pantalla_principal(usuario):
                     messagebox.showerror("Error", "No se encontró el turno.")
             else:
                 messagebox.showwarning("Advertencia", "Debe seleccionar un turno de la lista.")
-
-
-        # Función para abrir la ventana de edición de un turno
-        def modificar_turno():
-
-            selected_item = tree.selection()
-            if not selected_item:
-                messagebox.showwarning("Advertencia", "Seleccione un turno para editar")
-                return
-
-            item_id = tree.item(selected_item[0], 'values')[0]  # Obtener el ID del turno
-            turno = obtener_turno_por_id(int(item_id))  # Obtener el objeto Turno
-
-            if turno:
-                mostrar_ventana_edicion(turno)
+ 
+          
 
         def obtener_turno_por_id(turno_id):
             """Buscar un turno en la lista por su ID."""
@@ -106,35 +96,41 @@ def pantalla_principal(usuario):
             return None
 
         def guardar_cambios(turno, entry_nombre, entry_instructor, entry_horario, entry_capacidad):
-            """Guardar los cambios realizados en un turno."""
-            nombre = entry_nombre.get()
-            instructor = entry_instructor.get()
-            horario = entry_horario.get()
-            capacidad = entry_capacidad.get()
-
-            # Validación de campos vacíos
-            if not nombre or not instructor or not horario or not capacidad:
+    
+            # Obtener los nuevos valores de los campos
+            turno.nombre = entry_nombre.get()
+            turno.instructor = entry_instructor.get()
+            turno.horario = entry_horario.get()
+            turno.capacidad = entry_capacidad.get()
+       
+            # Validar que los campos no estén vacíos
+            if not turno.nombre or not turno.instructor or not turno.horario or not turno.capacidad:
                 messagebox.showerror("Error", "Por favor complete todos los campos")
                 return
 
-            # Actualizar los datos del turno
-            turno.nombre = nombre
-            turno.instructor = instructor
-            turno.horario = horario
-            turno.capacidad = capacidad
-
-            # Actualizar en el Treeview
+            Turno.guardar_datos()
+            # Actualizar la lista de turnos y guardar los datos
             actualizar_lista_turnos()
-
+            # Mostrar mensaje de éxito y cerrar ventana
             messagebox.showinfo("Turnos", "Turno actualizado correctamente")
             pantalla_edicion_turno_window.withdraw()  # Ocultar ventana de edición
 
-        def mostrar_ventana_edicion(turno):
+           
+            
+        def mostrar_ventana_edicion():
             """Muestra la ventana para editar un turno."""
             global pantalla_edicion_turno_window
             pantalla_edicion_turno_window = tk.Toplevel(pantalla_admin)
             pantalla_edicion_turno_window.title("Editar Turno")
+    
+            selected_item = tree.selection()
+            if not selected_item:
+                messagebox.showwarning("Advertencia", "Seleccione un turno para editar")
+                return
 
+            item_id = tree.item(selected_item[0], 'values')[0]  # Obtener el ID del turno
+            turno = obtener_turno_por_id(int(item_id))  # Obtener el objeto Turno
+    
             # Crear campos y etiquetas
             tk.Label(pantalla_edicion_turno_window, text="Nombre").grid(row=0, column=0)
             entry_nombre = tk.Entry(pantalla_edicion_turno_window)
@@ -156,7 +152,9 @@ def pantalla_principal(usuario):
             entry_capacidad.insert(0, turno.capacidad)
             entry_capacidad.grid(row=3, column=1)
 
-            tk.Button(pantalla_edicion_turno_window, text="Guardar", command=lambda: guardar_cambios(turno, entry_nombre, entry_instructor, entry_horario, entry_capacidad)).grid(row=4, column=0, columnspan=2)
+            # Botón para guardar cambios
+            botonguardar = tk.Button(pantalla_edicion_turno_window, text="Guardar",command=lambda: guardar_cambios(turno, entry_nombre, entry_instructor, entry_horario, entry_capacidad))
+            botonguardar.grid()
 
         # Ventana de alta de turno (inicialmente oculta)
         pantalla_alta_turno_window = tk.Toplevel(pantalla_admin)
@@ -199,7 +197,7 @@ def pantalla_principal(usuario):
         boton_baja = tk.Button(frame_botones, text="Eliminar", command=baja_turno)
         boton_baja.pack(pady=5, fill=tk.X)  
 
-        boton_modificacion = tk.Button(frame_botones, text="Editar", command=modificar_turno)
+        boton_modificacion = tk.Button(frame_botones, text="Editar", command = mostrar_ventana_edicion)
         boton_modificacion.pack(pady=5, fill=tk.X) 
         
         # Inicializar la lista de turnos en el Treeview
@@ -210,7 +208,7 @@ def pantalla_principal(usuario):
         tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
        
         # Inicializar la lista de turnos
-        Turno.cargar_datos()
+        
         actualizar_lista_turnos()
 
     elif usuario.funcion == 'socio':
@@ -230,41 +228,65 @@ def pantalla_principal(usuario):
                     messagebox.showinfo("Detalles del Turno", f"Nombre: {turno.nombre}\nInstructor: {turno.instructor}\nHorario: {turno.horario}\nCapacidad disponible: {turno.capacidad}")
             else:
                 messagebox.showwarning("Advertencia", "Debe seleccionar un turno.")
-
+        
         # Función para reservar un turno
         def reservar_turno():
+           
             turno_seleccionado = tree.selection()
 
             if turno_seleccionado:
                 # Obtener el índice del turno seleccionado
                 item = tree.item(turno_seleccionado)
-                turno_id = item['values'][0]
+                turno_id = int(item['values'][0])
                 usuario_dni = usuario_logueado.dni
                 # Buscar el turno por ID
-                turno = next((t for t in turnos if t.id == turno_id), None)
+                turno_objeto = next((t for t in turnos if t.id == turno_id), None)
+               
+                if turno_objeto and turno_objeto.capacidad > 0:
+                    actualizar_capacidad_turno(turno_id)
+                    
+                    
+                    # Crear una nueva reserva
+                    nueva_reserva = Reservas(usuario_dni, turno_id)
+                    Reservas.guardar_reserva(nueva_reserva)
+                    
+                    #Actualizar la lista de turnos
+                    actualizar_lista_turnos_socio()
+ 
+                    # Mensaje de confirmación
+                    messagebox.showinfo("Reserva", f"Has reservado el turno {turno_objeto.nombre}.")
 
-                if turno and turno.capacidad > 0:
-                    # Verificar si el usuario ya reservó este turno
-                    if not Reservas.verificar_reserva(usuario_dni, turno_id):
-                        # Crear una nueva reserva
-                        nueva_reserva = Reservas(usuario_dni, turno_id)
-                        Reservas.guardar_reserva(nueva_reserva)
-
-                        # Mensaje de confirmación
-                        messagebox.showinfo("Reserva", f"Has reservado el turno {turno.nombre}.")
-
-                        # Actualizar la capacidad del turno
-                        actualizar_capacidad_turno(turno_id)
-
-                        # Actualizar la lista de turnos
-                        actualizar_lista_turnos_socio()
-                    else:
-                        messagebox.showwarning("Advertencia", "Ya has reservado este turno.")
                 else:
                     messagebox.showwarning("Sin cupo", "Este turno ya está lleno o no tiene capacidad disponible.")
             else:
                 messagebox.showwarning("Advertencia", "Debe seleccionar un turno.")
+            
+        def actualizar_capacidad_turno(turno_id):
+            turno_encontrado = False  # Para verificar si el turno fue encontrado
 
+            for turno in turnos:
+                if turno.id == turno_id:
+                # Reducción de la capacidad del turno
+                    turno.capacidad -= 1
+                    turno_encontrado = True  # Marcamos que encontramos y modificamos el turno
+            
+                    # Verificar que la capacidad no sea negativa
+                    if turno.capacidad < 0:
+                        turno.capacidad = 0
+            
+                    print(f"Capacidad actualizada para turno {turno.id}: {turno.capacidad}")  # Imprimir para debug
+                    break  # Detenemos el loop ya que encontramos el turno
+                
+            # Verificar si el turno fue encontrado antes de guardar
+            if turno_encontrado:
+                # Guardar los datos actualizados en el archivo
+                Turno.guardar_datos()  # Sobrescribir el archivo con la nueva capacidad
+               
+
+
+                
+
+        
         # Función para actualizar la lista de turnos
         def actualizar_lista_turnos_socio():
             # Limpiar la lista actual
@@ -276,22 +298,10 @@ def pantalla_principal(usuario):
 
             # Mostrar solo los turnos que no han sido reservados por este usuario y que tengan capacidad
             for turno in turnos:
-                if turno.capacidad > 0 and turno.id not in turnos_reservados:
+                if turno.capacidad >= 1 and turno.id not in turnos_reservados:
                     tree.insert("", tk.END, values=(turno.id, turno.nombre))
 
-        # Función para actualizar la capacidad del turno
-        def actualizar_capacidad_turno(turno_id):
-            for turno in turnos:
-                if turno.id == turno_id:
-                    turno.capacidad -= 1  # Reducir la capacidad en 1
-
-                    if turno.capacidad < 0:
-                        turno.capacidad = 0  # Asegurarse de que la capacidad no sea menor a 0
-
-                    # Guardar los datos actualizados
-                    Turno.guardar_datos()
-                    break
-
+        
 
         # Frame para la pantalla de socio
         pantalla_socio = tk.Frame(ventana_principal)
@@ -306,7 +316,7 @@ def pantalla_principal(usuario):
         btn_detalles.pack(pady=5, fill=tk.X)
         
         # Botón para reservar
-        btn_reservar = tk.Button(frame_botones, text="Reservar", command= lambda: reservar_turno())
+        btn_reservar = tk.Button(frame_botones, text="Reservar", command=reservar_turno)
         btn_reservar.pack(pady=10, fill=tk.X)
 
         # Crear el Treeview con solo la columna "Nombre"
@@ -318,8 +328,6 @@ def pantalla_principal(usuario):
         tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
        
     
-        # Cargar y mostrar los turnos
-        Turno.cargar_datos()
         actualizar_lista_turnos_socio()
 
 

@@ -1,5 +1,4 @@
 
-
 reservas_archivo = 'reservas.txt'
 usuarios_archivo = 'usuarios.txt'
 turnos_archivo = 'turnos.txt'
@@ -41,8 +40,7 @@ class Persona:
         except (FileNotFoundError, ValueError):
             usuarios = []
 
-# Inicializar cargando los datos
-Persona.cargar_datos()
+
 
 class Turno:
     # Atributo de clase para mantener el último ID generado
@@ -90,10 +88,18 @@ class Turno:
 
     @staticmethod
     def guardar_datos():
-        with open(turnos_archivo, 'w') as archivo:
-            archivo.write(f"ultimo_id:{Turno.ultimo_id}\n")
-            for t in turnos:
-                archivo.write(f"{t.id},{t.nombre},{t.instructor},{t.horario},{t.capacidad}\n")
+        try:
+            # Abrimos el archivo para escritura en modo 'w' para guardar datos de los turnos
+            with open(turnos_archivo, 'w') as archivo: 
+                # Guardamos el último ID
+                archivo.write(f"ultimo_id:{Turno.ultimo_id}\n")
+                # Guardamos los datos de cada turno
+                for t in turnos:
+                    archivo.write(f"{t.id},{t.nombre},{t.instructor},{t.horario},{t.capacidad}\n")
+        except Exception as e:
+            print("Error al guardar datos:", e)  # Imprimir el error si ocurre
+
+                
 
     @staticmethod
     def cargar_datos():
@@ -156,8 +162,8 @@ class Reservas:
         reservas = Reservas.cargar_reservas()  
         return [int(reserva.turno_id) for reserva in reservas if reserva.usuario_dni == usuario_dni]
 
-# Inicializar cargando los datos
+
 Turno.cargar_datos()
-Reservas.cargar_reservas
-    
+Persona.cargar_datos()
+Reservas.cargar_reservas()
 

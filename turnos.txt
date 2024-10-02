@@ -1,11 +1,6 @@
-ultimo_id:49
-28,lffs,sdfds,234234,234
-30,huuh,yoel,1830,55
-33,lau,eber,2322332,324
-34,fees,sdfsdf,3244,234244
-35,sfdsf,sfdsf,34534,2432
-36,xcvx,xvc,324,3
-38,vxcx,xcvxv,xv,32
-42,ji,fg,3,23
-44,sfdfsdfsd,sfdfsd,243234,2234
-49,yoel,yoel,12,1
+ultimo_id:6
+1,nuevo,asd,123,0
+3,nuevo1,wads,2213,2
+4,nuevo3,asda,231,2
+5,nuevo4,asdasd,213132,3
+6,nuevo5,asdd,2324,4
