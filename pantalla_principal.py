@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox, ttk
 from clases import Turno, turnos, Reservas
-import pdb 
+
 
 
 def pantalla_principal(usuario):
@@ -56,8 +56,19 @@ def pantalla_principal(usuario):
             nombre = entry_nombre.get()
             instructor = entry_instructor.get()
             horario = entry_horario.get()
-            capacidad = entry_capacidad.get()
+            
 
+            try:
+                capacidad = int(entry_capacidad.get())
+                if capacidad < 0:
+                    raise ValueError("La capacidad no puede ser negativa.")  # Lanzar un error si es negativa
+            except ValueError as ve:
+                messagebox.showerror("Error", f"Por favor ingrese una capacidad válida. {ve}")
+                return
+
+            # Asignar la capacidad si es válida
+            capacidad = capacidad
+            
             # Validación de campos vacíos
             if not nombre or not instructor or not horario or not capacidad:
                 messagebox.showerror("Error", "Por favor complete todos los campos")
@@ -101,7 +112,16 @@ def pantalla_principal(usuario):
             turno.nombre = entry_nombre.get()
             turno.instructor = entry_instructor.get()
             turno.horario = entry_horario.get()
-            turno.capacidad = entry_capacidad.get()
+            try:
+                capacidad = int(entry_capacidad.get())
+                if capacidad < 0:
+                    raise ValueError("La capacidad no puede ser negativa.")  # Lanzar un error si es negativa
+            except ValueError as ve:
+                messagebox.showerror("Error", f"Por favor ingrese una capacidad válida. {ve}")
+                return
+
+            # Asignar la capacidad si es válida
+            turno.capacidad = capacidad
        
             # Validar que los campos no estén vacíos
             if not turno.nombre or not turno.instructor or not turno.horario or not turno.capacidad:
@@ -252,6 +272,7 @@ def pantalla_principal(usuario):
                     
                     #Actualizar la lista de turnos
                     actualizar_lista_turnos_socio()
+                    mis_reservas()
  
                     # Mensaje de confirmación
                     messagebox.showinfo("Reserva", f"Has reservado el turno {turno_objeto.nombre}.")
@@ -274,7 +295,7 @@ def pantalla_principal(usuario):
                     if turno.capacidad < 0:
                         turno.capacidad = 0
             
-                    print(f"Capacidad actualizada para turno {turno.id}: {turno.capacidad}")  # Imprimir para debug
+            
                     break  # Detenemos el loop ya que encontramos el turno
                 
             # Verificar si el turno fue encontrado antes de guardar
@@ -301,7 +322,18 @@ def pantalla_principal(usuario):
                 if turno.capacidad >= 1 and turno.id not in turnos_reservados:
                     tree.insert("", tk.END, values=(turno.id, turno.nombre))
 
-        
+        def mis_reservas(): 
+            # Limpiar la lista actual
+            for item in tree_reservas.get_children():
+                tree_reservas.delete(item)
+
+            # Cargar los turnos reservados por el usuario
+            turnos_reservados = Reservas.obtener_turnos_reservados(usuario_logueado.dni)
+
+            # Mostrar solo los turnos que no han sido reservados por este usuario y que tengan capacidad
+            for turno in turnos:
+                if  turno.id in turnos_reservados:
+                    tree_reservas.insert("", tk.END, values=(turno.id, turno.nombre, turno.horario))
 
         # Frame para la pantalla de socio
         pantalla_socio = tk.Frame(ventana_principal)
@@ -309,7 +341,7 @@ def pantalla_principal(usuario):
 
         # Frame para los botones
         frame_botones = tk.Frame(pantalla_socio)
-        frame_botones.pack(side=tk.RIGHT, fill=tk.Y, padx=10, pady=10)
+        frame_botones.pack(side=tk.LEFT, padx=10, pady=10)
 
         # Botón para ver detalles
         btn_detalles = tk.Button(frame_botones, text="Detalles", command=mostrar_detalles)
@@ -319,15 +351,43 @@ def pantalla_principal(usuario):
         btn_reservar = tk.Button(frame_botones, text="Reservar", command=reservar_turno)
         btn_reservar.pack(pady=10, fill=tk.X)
 
-        # Crear el Treeview con solo la columna "Nombre"
-        tree = ttk.Treeview(pantalla_socio, columns=('ID', 'Nombre'), show='headings')
+        # Frame para el título y la lista de turnos disponibles
+        frame_turnos = tk.Frame(pantalla_socio)
+        frame_turnos.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=10, pady=10)
+
+        # Etiqueta de título "Turnos disponibles"
+        lbl_turnos = tk.Label(frame_turnos, text="Turnos disponibles", font=("Arial", 14))
+        lbl_turnos.pack(pady=5)
+        
+        # Crear el Treeview con solo la columna "Nombre" para turnos disponibles
+        tree = ttk.Treeview(frame_turnos, columns=('ID', 'Nombre'), show='headings')
         tree.heading('Nombre', text='Nombre del Turno')
-        tree.heading('ID', text= 'ID') 
-        tree.column('ID', width=50, anchor=tk.CENTER) 
-        tree.column('Nombre', width=200, anchor=tk.W) 
-        tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        tree.heading('ID', text='ID')
+        tree.column('ID', width=50, anchor=tk.CENTER)
+        tree.column('Nombre', width=200, anchor=tk.W)
+        tree.pack(fill=tk.BOTH, expand=True)
+
+        
+        # Frame para el título y la nueva lista
+        frame_reservas = tk.Frame(pantalla_socio)
+        frame_reservas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=10, pady=10)
+
+        # Etiqueta de título "Mis reservas"
+        lbl_reservas = tk.Label(frame_reservas, text="Mis reservas", font=("Arial", 14))
+        lbl_reservas.pack(pady=5)
+
+        # Crear un segundo Treeview para "Mis reservas"
+        tree_reservas = ttk.Treeview(frame_reservas, columns=('ID', 'Reserva','Horario'), show='headings')
+        tree_reservas.heading('ID', text='ID Reserva')
+        tree_reservas.heading('Reserva', text='Nombre del Turno Reservado')
+        tree_reservas.heading('Horario', text= ' Horario')
+        tree_reservas.column('ID', width=100, anchor=tk.CENTER)
+        tree_reservas.column('Reserva', width=200, anchor=tk.W)
+        tree_reservas.column('Horario', width= 100, anchor=tk.W)
+        tree_reservas.pack(fill=tk.BOTH, expand=True)
+
        
     
         actualizar_lista_turnos_socio()
-
+        mis_reservas()
 

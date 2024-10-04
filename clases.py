@@ -88,16 +88,15 @@ class Turno:
 
     @staticmethod
     def guardar_datos():
-        try:
-            # Abrimos el archivo para escritura en modo 'w' para guardar datos de los turnos
-            with open(turnos_archivo, 'w') as archivo: 
-                # Guardamos el último ID
-                archivo.write(f"ultimo_id:{Turno.ultimo_id}\n")
-                # Guardamos los datos de cada turno
-                for t in turnos:
-                    archivo.write(f"{t.id},{t.nombre},{t.instructor},{t.horario},{t.capacidad}\n")
-        except Exception as e:
-            print("Error al guardar datos:", e)  # Imprimir el error si ocurre
+       
+        # Abrimos el archivo para escritura en modo 'w' para guardar datos de los turnos
+        with open(turnos_archivo, 'w') as archivo: 
+            # Guardamos el último ID
+            archivo.write(f"ultimo_id:{Turno.ultimo_id}\n")
+            # Guardamos los datos de cada turno
+            for t in turnos:
+                archivo.write(f"{t.id},{t.nombre},{t.instructor},{t.horario},{t.capacidad}\n")
+        
 
                 
 
@@ -118,9 +117,8 @@ class Turno:
                     turnos.append(Turno(int(id), nombre, instructor, horario, int(capacidad)))
         except FileNotFoundError:
             Turno.ultimo_id = 0
-            print("No se encontró el archivo. Lista de turnos vacía.")
-        except ValueError:
-            print("Error en el formato del archivo de turnos.")
+            ("No se encontró el archivo. Lista de turnos vacía.")
+        
 
 
 class Reservas:
