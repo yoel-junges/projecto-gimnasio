@@ -1,8 +1,2 @@
-ultimo_id:8
-1,nuevo,asd,123,2
-3,nuevo1,wads,2213,6
-4,nuevo3,asda,231,0
-5,nuevo4,asdasd,213132,3
-6,nuevo5,asdd,2324,4
-7,ahora,fasa,213,89
-8,asddas,sdasd,123312,2
+ultimo_id:3
+3,dv,sfd,243,234,23442

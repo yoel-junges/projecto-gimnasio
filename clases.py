@@ -46,19 +46,20 @@ class Turno:
     # Atributo de clase para mantener el último ID generado
     ultimo_id = 0
 
-    def __init__(self, id, nombre, instructor, horario, capacidad):
+    def __init__(self, id, nombre, instructor, horario, capacidad, fecha):
         self.id = id
         self.nombre = nombre
         self.instructor = instructor
         self.horario = horario
         self.capacidad = capacidad
+        self.fecha = fecha
         self.estado = False
         
 
     @staticmethod
-    def alta(nombre, instructor, horario, capacidad):
+    def alta(nombre, instructor, horario, capacidad, fecha):
         Turno.ultimo_id += 1
-        nuevo_turno = Turno(Turno.ultimo_id, nombre, instructor, horario, capacidad)
+        nuevo_turno = Turno(Turno.ultimo_id, nombre, instructor, horario, capacidad, fecha)
         turnos.append(nuevo_turno)
         return nuevo_turno
 
@@ -75,7 +76,7 @@ class Turno:
                     file.write(linea)
 
     @staticmethod
-    def modificacion(nombre, nuevo_instructor=None, nuevo_horario=None, nueva_capacidad=None):
+    def modificacion(nombre, nuevo_instructor=None, nuevo_horario=None, nueva_capacidad=None, nueva_fecha= None):
         for t in turnos:
             if t.nombre == nombre:
                 if nuevo_instructor:
@@ -84,6 +85,8 @@ class Turno:
                     t.horario = nuevo_horario
                 if nueva_capacidad is not None:
                     t.capacidad = nueva_capacidad
+                if nueva_fecha is not None:
+                    t.fecha = nueva_fecha
         Turno.guardar_datos()
 
     @staticmethod
@@ -95,7 +98,7 @@ class Turno:
             archivo.write(f"ultimo_id:{Turno.ultimo_id}\n")
             # Guardamos los datos de cada turno
             for t in turnos:
-                archivo.write(f"{t.id},{t.nombre},{t.instructor},{t.horario},{t.capacidad}\n")
+                archivo.write(f"{t.id},{t.nombre},{t.instructor},{t.horario},{t.capacidad},{t.fecha}\n")
         
 
                 
@@ -113,8 +116,8 @@ class Turno:
                     Turno.ultimo_id = 0
 
                 for linea in archivo:
-                    id, nombre, instructor, horario, capacidad = linea.strip().split(',')
-                    turnos.append(Turno(int(id), nombre, instructor, horario, int(capacidad)))
+                    id, nombre, instructor, horario, capacidad, fecha = linea.strip().split(',')
+                    turnos.append(Turno(int(id), nombre, instructor, horario, int(capacidad), fecha))
         except FileNotFoundError:
             Turno.ultimo_id = 0
             ("No se encontró el archivo. Lista de turnos vacía.")

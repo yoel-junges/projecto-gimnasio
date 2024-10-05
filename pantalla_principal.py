@@ -31,10 +31,10 @@ def pantalla_principal(usuario):
             # Insertar los turnos actuales
             for t in turnos:
                 
-                tree.insert("", tk.END, values=(str(t.id), t.nombre, t.instructor, str(t.horario), str(t.capacidad)))
+                tree.insert("", tk.END, values=(str(t.id), t.nombre, t.instructor, str(t.horario), str(t.capacidad), str(t.fecha)))
 
         def agregar_turno_a_treeview(turno):
-            tree.insert("", tk.END, values=(str(turno.id), turno.nombre, turno.instructor, str(turno.horario), str(turno.capacidad)))
+            tree.insert("", tk.END, values=(str(turno.id), turno.nombre, turno.instructor, str(turno.horario), str(turno.capacidad), str(turno.fecha)))
             tree.update_idletasks()
 
     
@@ -49,6 +49,7 @@ def pantalla_principal(usuario):
             entry_instructor.delete(0, tk.END)
             entry_horario.delete(0, tk.END)
             entry_capacidad.delete(0, tk.END)
+            entry_fecha.delete(0, tk.END)
             entry_nombre.focus_set()
 
         # Función para realizar el alta de un turno
@@ -56,6 +57,7 @@ def pantalla_principal(usuario):
             nombre = entry_nombre.get()
             instructor = entry_instructor.get()
             horario = entry_horario.get()
+            fecha = entry_fecha.get()
             
 
             try:
@@ -75,7 +77,7 @@ def pantalla_principal(usuario):
                 return
 
             # Alta de turno
-            nuevo_turno = Turno.alta(nombre, instructor, horario, capacidad)
+            nuevo_turno = Turno.alta(nombre, instructor, horario, capacidad, fecha)
             agregar_turno_a_treeview(nuevo_turno)
             nuevo_turno.guardar_datos()
             messagebox.showinfo("Turnos", "Turno dado de alta")
@@ -106,12 +108,14 @@ def pantalla_principal(usuario):
                     return t
             return None
 
-        def guardar_cambios(turno, entry_nombre, entry_instructor, entry_horario, entry_capacidad):
+        def guardar_cambios(turno, entry_nombre, entry_instructor, entry_horario, entry_capacidad, entry_fecha):
     
             # Obtener los nuevos valores de los campos
             turno.nombre = entry_nombre.get()
             turno.instructor = entry_instructor.get()
             turno.horario = entry_horario.get()
+            turno.fecha = entry_fecha.get()
+            
             try:
                 capacidad = int(entry_capacidad.get())
                 if capacidad < 0:
@@ -124,7 +128,7 @@ def pantalla_principal(usuario):
             turno.capacidad = capacidad
        
             # Validar que los campos no estén vacíos
-            if not turno.nombre or not turno.instructor or not turno.horario or not turno.capacidad:
+            if not turno.nombre or not turno.instructor or not turno.horario or not turno.capacidad or not turno.fecha:
                 messagebox.showerror("Error", "Por favor complete todos los campos")
                 return
 
@@ -134,8 +138,7 @@ def pantalla_principal(usuario):
             # Mostrar mensaje de éxito y cerrar ventana
             messagebox.showinfo("Turnos", "Turno actualizado correctamente")
             pantalla_edicion_turno_window.withdraw()  # Ocultar ventana de edición
-
-           
+ 
             
         def mostrar_ventana_edicion():
             """Muestra la ventana para editar un turno."""
@@ -172,10 +175,16 @@ def pantalla_principal(usuario):
             entry_capacidad.insert(0, turno.capacidad)
             entry_capacidad.grid(row=3, column=1)
 
-            # Botón para guardar cambios
-            botonguardar = tk.Button(pantalla_edicion_turno_window, text="Guardar",command=lambda: guardar_cambios(turno, entry_nombre, entry_instructor, entry_horario, entry_capacidad))
-            botonguardar.grid()
-
+            tk.Label(pantalla_edicion_turno_window, text="Fecha").grid(row=4, column=0)
+            entry_fecha = tk.Entry(pantalla_edicion_turno_window )
+            entry_fecha.grid(row=4, column=1)
+            entry_fecha.insert(0,turno.fecha )
+            
+            tk.Button(pantalla_edicion_turno_window, text="Guardar", command=lambda: guardar_cambios(turno, entry_nombre, entry_instructor, entry_horario, entry_capacidad, entry_fecha)).grid(row=4, column=0, columnspan=2)
+            
+   
+            
+         
         # Ventana de alta de turno (inicialmente oculta)
         pantalla_alta_turno_window = tk.Toplevel(pantalla_admin)
         pantalla_alta_turno_window.title('Alta de Turno')
@@ -206,6 +215,35 @@ def pantalla_principal(usuario):
         entry_capacidad = tk.Entry(frame_detalles)
         entry_capacidad.grid(row=3, column=1)
         
+        # Etiqueta y entrada para la fecha
+        tk.Label(frame_detalles, text="Fecha (DD/MM/AAAA): ").grid(row=4, column=0, sticky="w")
+    
+        # Crear la entrada de fecha con el texto marcador de posición
+        entry_fecha = tk.Entry(frame_detalles, fg='grey')
+        entry_fecha.grid(row=4, column=1)
+    
+        # Insertar el marcador de posición "DD/MM/AAAA" cuando se abre la ventana
+        entry_fecha.insert(0, "DD/MM/AAAA")
+    
+        # Función que se ejecuta cuando el campo obtiene el foco
+        def on_focus_in(event):
+            if entry_fecha.get() == "DD/MM/AAAA":
+                entry_fecha.delete(0, tk.END)  # Eliminar el marcador de posición
+                entry_fecha.config(fg='black')  # Cambiar el color a negro
+    
+        # Función que se ejecuta cuando el campo pierde el foco
+        def on_focus_out(event):
+            if entry_fecha.get() == "":  # Si el campo queda vacío
+                entry_fecha.insert(0, "DD/MM/AAAA")  # Reinsertar el marcador de posición
+                entry_fecha.config(fg='grey')  # Cambiar el color de texto a gris
+    
+        # Asociar los eventos a las funciones correspondientes
+        entry_fecha.bind("<FocusIn>", on_focus_in)
+        entry_fecha.bind("<FocusOut>", on_focus_out)
+            
+        
+         
+        
         # Crear un frame para contener los botones en la parte derecha
         frame_botones = tk.Frame(pantalla_admin)
         frame_botones.pack(side=tk.RIGHT, padx=10, pady=10, fill=tk.Y)
@@ -221,7 +259,7 @@ def pantalla_principal(usuario):
         boton_modificacion.pack(pady=5, fill=tk.X) 
         
         # Inicializar la lista de turnos en el Treeview
-        columns = ("ID", "Nombre", "Instructor", "Horario", "Capacidad")
+        columns = ("ID", "Nombre", "Instructor", "Horario", "Capacidad", "Fecha")
         tree = ttk.Treeview(pantalla_admin, columns=columns, show="headings")
         for col in columns:
             tree.heading(col, text=col)
@@ -245,7 +283,7 @@ def pantalla_principal(usuario):
 
                 if turno:
                     # Mostrar detalles del turno encontrado
-                    messagebox.showinfo("Detalles del Turno", f"Nombre: {turno.nombre}\nInstructor: {turno.instructor}\nHorario: {turno.horario}\nCapacidad disponible: {turno.capacidad}")
+                    messagebox.showinfo("Detalles del Turno", f"Nombre: {turno.nombre}\nInstructor: {turno.instructor}\nHorario: {turno.horario}\nCapacidad disponible: {turno.capacidad}\nFecha: {turno.fecha}")
             else:
                 messagebox.showwarning("Advertencia", "Debe seleccionar un turno.")
         
@@ -333,7 +371,7 @@ def pantalla_principal(usuario):
             # Mostrar solo los turnos que no han sido reservados por este usuario y que tengan capacidad
             for turno in turnos:
                 if  turno.id in turnos_reservados:
-                    tree_reservas.insert("", tk.END, values=(turno.id, turno.nombre, turno.horario))
+                    tree_reservas.insert("", tk.END, values=(turno.id, turno.nombre, turno.horario, turno.fecha))
 
         # Frame para la pantalla de socio
         pantalla_socio = tk.Frame(ventana_principal)
@@ -360,11 +398,13 @@ def pantalla_principal(usuario):
         lbl_turnos.pack(pady=5)
         
         # Crear el Treeview con solo la columna "Nombre" para turnos disponibles
-        tree = ttk.Treeview(frame_turnos, columns=('ID', 'Nombre'), show='headings')
+        tree = ttk.Treeview(frame_turnos, columns=('ID', 'Nombre', 'Fecha'), show='headings')
         tree.heading('Nombre', text='Nombre del Turno')
         tree.heading('ID', text='ID')
+        tree.heading("Fecha", text = "Fecha")
         tree.column('ID', width=50, anchor=tk.CENTER)
         tree.column('Nombre', width=200, anchor=tk.W)
+        tree.column('Fecha', width=100,anchor= tk.W )
         tree.pack(fill=tk.BOTH, expand=True)
 
         
@@ -377,13 +417,15 @@ def pantalla_principal(usuario):
         lbl_reservas.pack(pady=5)
 
         # Crear un segundo Treeview para "Mis reservas"
-        tree_reservas = ttk.Treeview(frame_reservas, columns=('ID', 'Reserva','Horario'), show='headings')
+        tree_reservas = ttk.Treeview(frame_reservas, columns=('ID', 'Nombre','Horario'), show='headings')
         tree_reservas.heading('ID', text='ID Reserva')
-        tree_reservas.heading('Reserva', text='Nombre del Turno Reservado')
+        tree_reservas.heading('Nombre', text='Nombre del Turno Reservado')
         tree_reservas.heading('Horario', text= ' Horario')
+        tree_reservas.heading("Fecha", text = 'Fecha')
         tree_reservas.column('ID', width=100, anchor=tk.CENTER)
         tree_reservas.column('Reserva', width=200, anchor=tk.W)
         tree_reservas.column('Horario', width= 100, anchor=tk.W)
+        tree_reservas.column('Fecha', width=100, anchor= tk.W)
         tree_reservas.pack(fill=tk.BOTH, expand=True)
 
        
