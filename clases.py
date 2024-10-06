@@ -163,6 +163,19 @@ class Reservas:
         reservas = Reservas.cargar_reservas()  
         return [int(reserva.turno_id) for reserva in reservas if reserva.usuario_dni == usuario_dni]
 
+    
+    @staticmethod
+    def eliminar_reserva(usuario_dni, turno_id):
+        """Eliminar una reserva del archivo y de la lista."""
+        reservas = Reservas.cargar_reservas()  # Cargar reservas existentes
+        reservas_filtradas = [reserva for reserva in reservas if not (reserva.usuario_dni == usuario_dni and reserva.turno_id == turno_id)]
+        
+        # Guardar las reservas filtradas de nuevo en el archivo
+        with open('reservas.txt', 'w') as f:
+            for reserva in reservas_filtradas:
+                f.write(f"{reserva.usuario_dni},{reserva.turno_id}\n")
+        
+        return reservas_filtradas 
 
 Turno.cargar_datos()
 Persona.cargar_datos()

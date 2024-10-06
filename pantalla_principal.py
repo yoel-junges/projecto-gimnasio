@@ -102,7 +102,6 @@ def pantalla_principal(usuario):
           
 
         def obtener_turno_por_id(turno_id):
-            """Buscar un turno en la lista por su ID."""
             for t in turnos:
                 if t.id == turno_id:
                     return t
@@ -180,7 +179,7 @@ def pantalla_principal(usuario):
             entry_fecha.grid(row=4, column=1)
             entry_fecha.insert(0,turno.fecha )
             
-            tk.Button(pantalla_edicion_turno_window, text="Guardar", command=lambda: guardar_cambios(turno, entry_nombre, entry_instructor, entry_horario, entry_capacidad, entry_fecha)).grid(row=4, column=0, columnspan=2)
+            tk.Button(pantalla_edicion_turno_window, text="Guardar", command=lambda: guardar_cambios(turno, entry_nombre, entry_instructor, entry_horario, entry_capacidad, entry_fecha)).grid(row=5, column=0, columnspan=2)
             
    
             
@@ -271,21 +270,27 @@ def pantalla_principal(usuario):
 
     elif usuario.funcion == 'socio':
         
-        def mostrar_detalles():
-            turno_seleccionado = tree.selection()
+        def cancelar_reserva():
+            turno_seleccionado = tree_reservas.selection()  # Asegúrate de usar el Treeview correcto para las reservas
             if turno_seleccionado:
                 # Obtener el índice del turno seleccionado
-                item = tree.item(turno_seleccionado)
-                turno_nombre = item['values'][1]  # Obtener el nombre del turno
+                item = tree_reservas.item(turno_seleccionado)
+                turno_id = int(item['values'][4]) # Obtener el ID del turno
+                usuario_dni = usuario_logueado.dni
+                
+                
+                # Eliminar la reserva
+                Reservas.eliminar_reserva(usuario_dni, turno_id)
+                actualizar_capacidad_turno_cancelado(turno_id)
 
-                # Buscar el turno en la lista de turnos
-                turno = next((t for t in turnos if t.nombre == turno_nombre), None)
+                # Actualizar la lista de reservas después de la eliminación
+                mis_reservas()  # Asegúrate de tener esta función para actualizar la vista
+                actualizar_lista_turnos_socio()
 
-                if turno:
-                    # Mostrar detalles del turno encontrado
-                    messagebox.showinfo("Detalles del Turno", f"Nombre: {turno.nombre}\nInstructor: {turno.instructor}\nHorario: {turno.horario}\nCapacidad disponible: {turno.capacidad}\nFecha: {turno.fecha}")
+                messagebox.showinfo("Éxito", "Reserva cancelada con éxito.")
             else:
-                messagebox.showwarning("Advertencia", "Debe seleccionar un turno.")
+                messagebox.showwarning("Advertencia", "Debe seleccionar un turno en mis reservas.")
+
         
         # Función para reservar un turno
         def reservar_turno():
@@ -295,7 +300,7 @@ def pantalla_principal(usuario):
             if turno_seleccionado:
                 # Obtener el índice del turno seleccionado
                 item = tree.item(turno_seleccionado)
-                turno_id = int(item['values'][0])
+                turno_id = int(item['values'][4])
                 usuario_dni = usuario_logueado.dni
                 # Buscar el turno por ID
                 turno_objeto = next((t for t in turnos if t.id == turno_id), None)
@@ -307,7 +312,7 @@ def pantalla_principal(usuario):
                     # Crear una nueva reserva
                     nueva_reserva = Reservas(usuario_dni, turno_id)
                     Reservas.guardar_reserva(nueva_reserva)
-                    
+        
                     #Actualizar la lista de turnos
                     actualizar_lista_turnos_socio()
                     mis_reservas()
@@ -344,7 +349,15 @@ def pantalla_principal(usuario):
 
 
                 
-
+        def actualizar_capacidad_turno_cancelado(turno_id):
+            for turno in turnos:
+                if turno.id == turno_id:
+                    # Incrementar la capacidad del turno
+                    turno.capacidad += 1
+            
+                    # Guardar los datos actualizados en el archivo
+                    Turno.guardar_datos()  # Asegúrate de que este método guarde todos los turnos
+                    break  # Detenemos el loop ya que encontramos el turno
         
         # Función para actualizar la lista de turnos
         def actualizar_lista_turnos_socio():
@@ -358,7 +371,7 @@ def pantalla_principal(usuario):
             # Mostrar solo los turnos que no han sido reservados por este usuario y que tengan capacidad
             for turno in turnos:
                 if turno.capacidad >= 1 and turno.id not in turnos_reservados:
-                    tree.insert("", tk.END, values=(turno.id, turno.nombre))
+                    tree.insert("", tk.END, values=(turno.nombre, turno.instructor, turno.horario, turno.fecha, turno.id))
 
         def mis_reservas(): 
             # Limpiar la lista actual
@@ -368,10 +381,10 @@ def pantalla_principal(usuario):
             # Cargar los turnos reservados por el usuario
             turnos_reservados = Reservas.obtener_turnos_reservados(usuario_logueado.dni)
 
-            # Mostrar solo los turnos que no han sido reservados por este usuario y que tengan capacidad
+            
             for turno in turnos:
                 if  turno.id in turnos_reservados:
-                    tree_reservas.insert("", tk.END, values=(turno.id, turno.nombre, turno.horario, turno.fecha))
+                    tree_reservas.insert("", tk.END, values=(turno.nombre,turno.instructor, turno.horario, turno.fecha,turno.id))
 
         # Frame para la pantalla de socio
         pantalla_socio = tk.Frame(ventana_principal)
@@ -380,14 +393,16 @@ def pantalla_principal(usuario):
         # Frame para los botones
         frame_botones = tk.Frame(pantalla_socio)
         frame_botones.pack(side=tk.LEFT, padx=10, pady=10)
-
-        # Botón para ver detalles
-        btn_detalles = tk.Button(frame_botones, text="Detalles", command=mostrar_detalles)
-        btn_detalles.pack(pady=5, fill=tk.X)
         
         # Botón para reservar
         btn_reservar = tk.Button(frame_botones, text="Reservar", command=reservar_turno)
-        btn_reservar.pack(pady=10, fill=tk.X)
+        btn_reservar.pack(pady=5, fill=tk.X)
+
+        # Botón para ver detalles
+        bton_cancelarR = tk.Button(frame_botones, text="Cancelar reserva", command=cancelar_reserva)
+        bton_cancelarR.pack(pady=10, fill=tk.X)
+        
+        
 
         # Frame para el título y la lista de turnos disponibles
         frame_turnos = tk.Frame(pantalla_socio)
@@ -398,12 +413,14 @@ def pantalla_principal(usuario):
         lbl_turnos.pack(pady=5)
         
         # Crear el Treeview con solo la columna "Nombre" para turnos disponibles
-        tree = ttk.Treeview(frame_turnos, columns=('ID', 'Nombre', 'Fecha'), show='headings')
-        tree.heading('Nombre', text='Nombre del Turno')
-        tree.heading('ID', text='ID')
+        tree = ttk.Treeview(frame_turnos, columns=('Nombre', 'Instructor','Horario','Fecha'), show='headings')
+        tree.heading('Nombre', text='Actividad')
+        tree.heading('Instructor', text= 'Profesor')
+        tree.heading("Horario", text = 'Horario')
         tree.heading("Fecha", text = "Fecha")
-        tree.column('ID', width=50, anchor=tk.CENTER)
-        tree.column('Nombre', width=200, anchor=tk.W)
+        tree.column('Nombre', width=150, anchor=tk.W)
+        tree.column('Instructor', width= 150, anchor=tk.W)
+        tree.column("Horario", width = 100, anchor=tk.W)
         tree.column('Fecha', width=100,anchor= tk.W )
         tree.pack(fill=tk.BOTH, expand=True)
 
@@ -417,13 +434,13 @@ def pantalla_principal(usuario):
         lbl_reservas.pack(pady=5)
 
         # Crear un segundo Treeview para "Mis reservas"
-        tree_reservas = ttk.Treeview(frame_reservas, columns=('ID', 'Nombre','Horario'), show='headings')
-        tree_reservas.heading('ID', text='ID Reserva')
-        tree_reservas.heading('Nombre', text='Nombre del Turno Reservado')
+        tree_reservas = ttk.Treeview(frame_reservas, columns=('Nombre','Instructor','Horario', 'Fecha'), show='headings')
+        tree_reservas.heading('Nombre', text='Actividad')
+        tree_reservas.heading('Instructor', text='Profesor')
         tree_reservas.heading('Horario', text= ' Horario')
         tree_reservas.heading("Fecha", text = 'Fecha')
-        tree_reservas.column('ID', width=100, anchor=tk.CENTER)
-        tree_reservas.column('Reserva', width=200, anchor=tk.W)
+        tree_reservas.column('Nombre', width=150, anchor=tk.W)
+        tree_reservas.column('Instructor', width= 150, anchor= tk.W)
         tree_reservas.column('Horario', width= 100, anchor=tk.W)
         tree_reservas.column('Fecha', width=100, anchor= tk.W)
         tree_reservas.pack(fill=tk.BOTH, expand=True)

@@ -4,6 +4,7 @@ from clases import Persona, usuarios
 from pantalla_principal import pantalla_principal
 from datetime import datetime
 
+codigo_admi= "12A34"
 # Función para manejar el login
 def login():
     usuario_nombre = entry_usuario.get()
@@ -27,6 +28,12 @@ def registrar_usuario():
     usuario_nombre = entry_usuario_reg.get()
     contraseña = entry_clave_reg.get()
     funcion = funcion_var.get()  # Obtener la función seleccionada
+    # Validación del código si se selecciona "administrador"
+    if funcion == "administrador":
+        codigo_ingresado = entry_codigo.get()
+        if codigo_ingresado != codigo_admi:
+            messagebox.showerror("Error", "Código de administrador incorrecto.")
+            return
 
     # Verificar que todos los campos obligatorios estén llenos
     if not nombre or not apellido or not edad or not dni or not telefono or not usuario_nombre or not contraseña or funcion == 'opciones':
@@ -56,6 +63,7 @@ def limpiar_campos_registro():
     entry_telefono.delete(0, tk.END)
     entry_usuario_reg.delete(0, tk.END)
     entry_clave_reg.delete(0, tk.END)
+    entry_codigo.delete(0, tk.END)
 
     # Establecer el foco en el primer campo de entrada
     entry_nombre.focus_set()
@@ -144,8 +152,14 @@ label_funcion.pack()
 
 opciones_funcion = ["administrador", "socio"]
 funcion_var = tk.StringVar(ventana_registro)
+funcion_var.set(opciones_funcion[0])
 menu_funcion = tk.OptionMenu(ventana_registro, funcion_var, *opciones_funcion)
 menu_funcion.pack()
+# Etiqueta y campo para el código del administrador
+tk.Label(ventana_registro, text="Código (solo para administrador):").pack()
+entry_codigo = tk.Entry(ventana_registro, show="*")
+entry_codigo.pack()
+
 
 # Botón de registro
 boton_registrar = tk.Button(ventana_registro, text="Registrar", command=registrar_usuario)
