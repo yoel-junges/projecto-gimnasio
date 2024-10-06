@@ -20,30 +20,21 @@ def pantalla_principal(usuario):
         pantalla_admin = tk.Frame(ventana_principal)
         pantalla_admin.pack(pady=10)
 
-
         def actualizar_lista_turnos():
-            
-            """Función para actualizar la lista de turnos en el Treeview."""
-            # Limpiar la lista actual
             for item in tree.get_children():
                 tree.delete(item)
-            
-            # Insertar los turnos actuales
+         
             for t in turnos:
-                
                 tree.insert("", tk.END, values=(str(t.id), t.nombre, t.instructor, str(t.horario), str(t.capacidad), str(t.fecha)))
 
         def agregar_turno_a_treeview(turno):
             tree.insert("", tk.END, values=(str(turno.id), turno.nombre, turno.instructor, str(turno.horario), str(turno.capacidad), str(turno.fecha)))
             tree.update_idletasks()
 
-    
-        # Función para mostrar la pantalla de alta de turno
         def pantalla_alta_turno():
             limpiar_campos_alta()
             pantalla_alta_turno_window.deiconify()  # Mostrar ventana de alta de turno
 
-        # Función para limpiar los campos de entrada en la ventana de alta
         def limpiar_campos_alta():
             entry_nombre.delete(0, tk.END)
             entry_instructor.delete(0, tk.END)
@@ -52,14 +43,12 @@ def pantalla_principal(usuario):
             entry_fecha.delete(0, tk.END)
             entry_nombre.focus_set()
 
-        # Función para realizar el alta de un turno
         def alta_turno():
             nombre = entry_nombre.get()
             instructor = entry_instructor.get()
             horario = entry_horario.get()
             fecha = entry_fecha.get()
             
-
             try:
                 capacidad = int(entry_capacidad.get())
                 if capacidad < 0:
@@ -67,39 +56,32 @@ def pantalla_principal(usuario):
             except ValueError as ve:
                 messagebox.showerror("Error", f"Por favor ingrese una capacidad válida. {ve}")
                 return
-
-            # Asignar la capacidad si es válida
             capacidad = capacidad
-            
-            # Validación de campos vacíos
             if not nombre or not instructor or not horario or not capacidad:
                 messagebox.showerror("Error", "Por favor complete todos los campos")
                 return
 
-            # Alta de turno
             nuevo_turno = Turno.alta(nombre, instructor, horario, capacidad, fecha)
             agregar_turno_a_treeview(nuevo_turno)
             nuevo_turno.guardar_datos()
             messagebox.showinfo("Turnos", "Turno dado de alta")
-            pantalla_alta_turno_window.withdraw()  # Ocultar ventana de alta
+            pantalla_alta_turno_window.withdraw()  
 
         def baja_turno():
             turno_seleccionado = tree.selection()
             if turno_seleccionado:
-                turno_id = tree.item(turno_seleccionado)['values'][0]  # Obtener el ID del turno seleccionado
+                turno_id = tree.item(turno_seleccionado)['values'][0] 
                 turno_a_eliminar = obtener_turno_por_id(int(turno_id))
         
                 if turno_a_eliminar:
-                    turnos.remove(turno_a_eliminar)  # Eliminar el turno de la lista
-                    Turno.baja(turno_a_eliminar.id)  # Eliminar del archivo usando el ID
-                    actualizar_lista_turnos()  # Actualizar la interfaz
+                    turnos.remove(turno_a_eliminar)  
+                    Turno.baja(turno_a_eliminar.id)  
+                    actualizar_lista_turnos()  
                     messagebox.showinfo("Éxito", "Turno eliminado correctamente.")
                 else:
                     messagebox.showerror("Error", "No se encontró el turno.")
             else:
                 messagebox.showwarning("Advertencia", "Debe seleccionar un turno de la lista.")
- 
-          
 
         def obtener_turno_por_id(turno_id):
             for t in turnos:
@@ -108,7 +90,6 @@ def pantalla_principal(usuario):
             return None
 
         def guardar_cambios(turno, entry_nombre, entry_instructor, entry_horario, entry_capacidad, entry_fecha):
-    
             # Obtener los nuevos valores de los campos
             turno.nombre = entry_nombre.get()
             turno.instructor = entry_instructor.get()
@@ -118,23 +99,20 @@ def pantalla_principal(usuario):
             try:
                 capacidad = int(entry_capacidad.get())
                 if capacidad < 0:
-                    raise ValueError("La capacidad no puede ser negativa.")  # Lanzar un error si es negativa
+                    raise ValueError("La capacidad no puede ser negativa.") 
             except ValueError as ve:
                 messagebox.showerror("Error", f"Por favor ingrese una capacidad válida. {ve}")
                 return
 
             # Asignar la capacidad si es válida
             turno.capacidad = capacidad
-       
-            # Validar que los campos no estén vacíos
+
             if not turno.nombre or not turno.instructor or not turno.horario or not turno.capacidad or not turno.fecha:
                 messagebox.showerror("Error", "Por favor complete todos los campos")
                 return
 
             Turno.guardar_datos()
-            # Actualizar la lista de turnos y guardar los datos
             actualizar_lista_turnos()
-            # Mostrar mensaje de éxito y cerrar ventana
             messagebox.showinfo("Turnos", "Turno actualizado correctamente")
             pantalla_edicion_turno_window.withdraw()  # Ocultar ventana de edición
  
@@ -181,9 +159,6 @@ def pantalla_principal(usuario):
             
             tk.Button(pantalla_edicion_turno_window, text="Guardar", command=lambda: guardar_cambios(turno, entry_nombre, entry_instructor, entry_horario, entry_capacidad, entry_fecha)).grid(row=5, column=0, columnspan=2)
             
-   
-            
-         
         # Ventana de alta de turno (inicialmente oculta)
         pantalla_alta_turno_window = tk.Toplevel(pantalla_admin)
         pantalla_alta_turno_window.title('Alta de Turno')
@@ -232,22 +207,18 @@ def pantalla_principal(usuario):
     
         # Función que se ejecuta cuando el campo pierde el foco
         def on_focus_out(event):
-            if entry_fecha.get() == "":  # Si el campo queda vacío
-                entry_fecha.insert(0, "DD/MM/AAAA")  # Reinsertar el marcador de posición
-                entry_fecha.config(fg='grey')  # Cambiar el color de texto a gris
+            if entry_fecha.get() == "":  
+                entry_fecha.insert(0, "DD/MM/AAAA")  
+                entry_fecha.config(fg='grey') 
     
         # Asociar los eventos a las funciones correspondientes
         entry_fecha.bind("<FocusIn>", on_focus_in)
         entry_fecha.bind("<FocusOut>", on_focus_out)
-            
-        
-         
-        
-        # Crear un frame para contener los botones en la parte derecha
+    
+        #frame para contener los botones en la parte derecha
         frame_botones = tk.Frame(pantalla_admin)
         frame_botones.pack(side=tk.RIGHT, padx=10, pady=10, fill=tk.Y)
 
-        # Botones para alta, baja y modificación de turnos
         boton_alta = tk.Button(frame_botones, text="Cargar turno", command=pantalla_alta_turno)
         boton_alta.pack(pady=5, fill=tk.X)  
 
@@ -257,46 +228,35 @@ def pantalla_principal(usuario):
         boton_modificacion = tk.Button(frame_botones, text="Editar", command = mostrar_ventana_edicion)
         boton_modificacion.pack(pady=5, fill=tk.X) 
         
-        # Inicializar la lista de turnos en el Treeview
         columns = ("ID", "Nombre", "Instructor", "Horario", "Capacidad", "Fecha")
         tree = ttk.Treeview(pantalla_admin, columns=columns, show="headings")
         for col in columns:
             tree.heading(col, text=col)
         tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
        
-        # Inicializar la lista de turnos
-        
         actualizar_lista_turnos()
 
     elif usuario.funcion == 'socio':
         
         def cancelar_reserva():
-            turno_seleccionado = tree_reservas.selection()  # Asegúrate de usar el Treeview correcto para las reservas
+            turno_seleccionado = tree_reservas.selection() 
             if turno_seleccionado:
-                # Obtener el índice del turno seleccionado
                 item = tree_reservas.item(turno_seleccionado)
                 turno_id = int(item['values'][4]) # Obtener el ID del turno
                 usuario_dni = usuario_logueado.dni
                 
-                
-                # Eliminar la reserva
                 Reservas.eliminar_reserva(usuario_dni, turno_id)
                 actualizar_capacidad_turno_cancelado(turno_id)
-
-                # Actualizar la lista de reservas después de la eliminación
-                mis_reservas()  # Asegúrate de tener esta función para actualizar la vista
+                mis_reservas() 
                 actualizar_lista_turnos_socio()
 
                 messagebox.showinfo("Éxito", "Reserva cancelada con éxito.")
             else:
                 messagebox.showwarning("Advertencia", "Debe seleccionar un turno en mis reservas.")
 
-        
         # Función para reservar un turno
         def reservar_turno():
-           
             turno_seleccionado = tree.selection()
-
             if turno_seleccionado:
                 # Obtener el índice del turno seleccionado
                 item = tree.item(turno_seleccionado)
@@ -307,19 +267,12 @@ def pantalla_principal(usuario):
                
                 if turno_objeto and turno_objeto.capacidad > 0:
                     actualizar_capacidad_turno(turno_id)
-                    
-                    
-                    # Crear una nueva reserva
                     nueva_reserva = Reservas(usuario_dni, turno_id)
                     Reservas.guardar_reserva(nueva_reserva)
         
-                    #Actualizar la lista de turnos
                     actualizar_lista_turnos_socio()
                     mis_reservas()
- 
-                    # Mensaje de confirmación
                     messagebox.showinfo("Reserva", f"Has reservado el turno {turno_objeto.nombre}.")
-
                 else:
                     messagebox.showwarning("Sin cupo", "Este turno ya está lleno o no tiene capacidad disponible.")
             else:
@@ -327,37 +280,24 @@ def pantalla_principal(usuario):
             
         def actualizar_capacidad_turno(turno_id):
             turno_encontrado = False  # Para verificar si el turno fue encontrado
-
             for turno in turnos:
                 if turno.id == turno_id:
-                # Reducción de la capacidad del turno
                     turno.capacidad -= 1
                     turno_encontrado = True  # Marcamos que encontramos y modificamos el turno
-            
-                    # Verificar que la capacidad no sea negativa
+  
                     if turno.capacidad < 0:
                         turno.capacidad = 0
-            
-            
-                    break  # Detenemos el loop ya que encontramos el turno
-                
-            # Verificar si el turno fue encontrado antes de guardar
+                    break  
             if turno_encontrado:
-                # Guardar los datos actualizados en el archivo
-                Turno.guardar_datos()  # Sobrescribir el archivo con la nueva capacidad
-               
-
-
-                
+                Turno.guardar_datos() 
+                       
         def actualizar_capacidad_turno_cancelado(turno_id):
             for turno in turnos:
                 if turno.id == turno_id:
-                    # Incrementar la capacidad del turno
                     turno.capacidad += 1
-            
                     # Guardar los datos actualizados en el archivo
-                    Turno.guardar_datos()  # Asegúrate de que este método guarde todos los turnos
-                    break  # Detenemos el loop ya que encontramos el turno
+                    Turno.guardar_datos()  
+                    break 
         
         # Función para actualizar la lista de turnos
         def actualizar_lista_turnos_socio():
@@ -401,8 +341,6 @@ def pantalla_principal(usuario):
         # Botón para ver detalles
         bton_cancelarR = tk.Button(frame_botones, text="Cancelar reserva", command=cancelar_reserva)
         bton_cancelarR.pack(pady=10, fill=tk.X)
-        
-        
 
         # Frame para el título y la lista de turnos disponibles
         frame_turnos = tk.Frame(pantalla_socio)
@@ -424,7 +362,6 @@ def pantalla_principal(usuario):
         tree.column('Fecha', width=100,anchor= tk.W )
         tree.pack(fill=tk.BOTH, expand=True)
 
-        
         # Frame para el título y la nueva lista
         frame_reservas = tk.Frame(pantalla_socio)
         frame_reservas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=10, pady=10)
@@ -445,8 +382,6 @@ def pantalla_principal(usuario):
         tree_reservas.column('Fecha', width=100, anchor= tk.W)
         tree_reservas.pack(fill=tk.BOTH, expand=True)
 
-       
-    
         actualizar_lista_turnos_socio()
         mis_reservas()
 

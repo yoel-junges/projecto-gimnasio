@@ -1,4 +1,5 @@
 import tkinter as tk
+from PIL import Image, ImageTk
 from tkinter import messagebox
 from clases import Persona, usuarios
 from pantalla_principal import pantalla_principal
@@ -82,27 +83,37 @@ def actualizar_fecha_hora():
     
 # Ventana login de la aplicación
 pantalla_login = tk.Tk()
-pantalla_login.title('Login')
-pantalla_login.geometry('225x395')
+pantalla_login.title('Ingreso')
+pantalla_login.geometry('325x495')
+# Cargar la imagen de fondo
+fondo_imagen = Image.open('img-login.jpg')  
+fondo_imagen = fondo_imagen.resize((325, 495),  Image.Resampling.LANCZOS)  
+fondo = ImageTk.PhotoImage(fondo_imagen)
+
+# Crear un label para mostrar la imagen de fondo
+label_fondo = tk.Label(pantalla_login, image=fondo)
+label_fondo.place(x=0, y=0, relwidth=1, relheight=1)  # Colocar la imagen en toda la ventana  
+
+  
 
 # Etiquetas y campos de entrada para login
-label_usuario = tk.Label(pantalla_login, text="Usuario")
-label_usuario.pack()
+label_usuario = tk.Label(pantalla_login, text="Usuario:", bg='#d9d9d9')
+label_usuario.pack(pady=(50,5))
 entry_usuario = tk.Entry(pantalla_login)
-entry_usuario.pack()
+entry_usuario.pack(pady=5)
 
-label_clave = tk.Label(pantalla_login, text="Clave")
-label_clave.pack()
+label_clave = tk.Label(pantalla_login, text="Clave:", bg='#d9d9d9')
+label_clave.pack(pady=(15,5))
 entry_clave = tk.Entry(pantalla_login, show="*")
-entry_clave.pack()
+entry_clave.pack(pady=5)
 
 # Botón de login
-boton_login = tk.Button(pantalla_login, text="Login", command=login)
-boton_login.pack()
+boton_login = tk.Button(pantalla_login, text="Ingresar", command=login)
+boton_login.pack(pady=20)
 
 # Botón para abrir ventana de registro
-boton_registro = tk.Button(pantalla_login, text="Registrar", command=abrir_ventana_registro)
-boton_registro.pack()
+boton_registro = tk.Button(pantalla_login, text="Registrarse", command=abrir_ventana_registro)
+boton_registro.pack(pady=(60,20))
 
 # Ventana de registro (inicialmente oculta)
 ventana_registro = tk.Toplevel(pantalla_login)
@@ -166,7 +177,7 @@ boton_registrar = tk.Button(ventana_registro, text="Registrar", command=registra
 boton_registrar.pack()
 
 # Crear una etiqueta para mostrar la fecha y hora
-etiqueta_fecha_hora = tk.Label(pantalla_login, font=('Arial', 14))
+etiqueta_fecha_hora = tk.Label(pantalla_login, font=('Arial', 14), bg="lightblue", fg="black")
 
 # Posicionar la etiqueta en la parte inferior derecha de la ventana
 etiqueta_fecha_hora.place(relx=1.0, rely=1.0, anchor='se', x=-10, y=-10)  # -10 px de margen
