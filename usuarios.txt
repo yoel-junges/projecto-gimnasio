@@ -1,5 +1,9 @@
 yoel,junges,25,41658869,3496******,admi,1234,administrador
-yoel,junges,2222,222,2222,socio,1234,socio
-yootyry,ryry,234,234234,25353,socio1,1234,socio
-yoel,sff,123,12331,14133,admi1,1234,administrador
-sfdsf,sdfsfd,234,2344,2434,admi2,1234,administrador
+Roman,Riquelme,43,12345678,011-*******,romanriquelme,1234,socio
+Carlos,Tevez,39,87654321,011-*********,carlostevez,1234,socio
+Diego,Maradona,63,23456789,011-*******,diegomaradona,1234,socio
+Martín,Palermo,50,34567890,011-******,martinpalermo,1234,socio
+Nicolás,Burdisso,43,56789012,011-*******,nicolasburdisso,1234,socio
+Fernando,Gago,37,67890123,011-*******,fernandogago,1234,socio
+Sebastián,Battaglia,35,89012345,011-********,sebastianbattaglia,1234,socio
+Guillermo,Barros Schelotto,50,90123456,011-******,guillermobarros,1234,socio

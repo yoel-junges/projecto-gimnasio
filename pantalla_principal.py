@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import messagebox, ttk
-from clases import Turno, turnos, Reservas
+from clases import Turno, turnos, Reservas, Persona, usuarios
 
 
 
@@ -116,6 +116,59 @@ def pantalla_principal(usuario):
             messagebox.showinfo("Turnos", "Turno actualizado correctamente")
             pantalla_edicion_turno_window.withdraw()  # Ocultar ventana de edición
  
+        def mostrar_reservas():
+            # Cargar los datos de los usuarios
+            Persona.cargar_datos()
+            global usuarios
+
+            if usuarios: 
+                # Obtener el turno seleccionado del Treeview
+                seleccion = tree.focus()
+                turno_info = tree.item(seleccion, "values")
+                turno_id = int(turno_info[0])  # Obtenemos el ID del turno seleccionado
+                turno_nombre = turno_info[1]
+
+                # Cargar todas las reservas
+                todas_las_reservas = Reservas.cargar_reservas()
+
+                # Filtrar las reservas que coinciden con el turno seleccionado
+                reservas_turno = [reserva for reserva in todas_las_reservas if reserva.turno_id == turno_id]
+                
+                if not reservas_turno:
+                    tk.messagebox.showinfo("Información", f"No hay reservas para el Turno {turno_nombre}")
+                    return
+
+                # Crear la ventana que mostrará las reservas
+                ventana_reservas = tk.Toplevel()
+                ventana_reservas.title(f"Reservas del Turno {turno_nombre} (ID: {turno_id})")
+                ventana_reservas.geometry('400x300')
+
+                # Definir las columnas del Treeview (DNI, Nombre, Apellido)
+                columnas_reservas = ("DNI", "Nombre", "Apellido")
+                tree_reservas = ttk.Treeview(ventana_reservas, columns=columnas_reservas, show="headings")
+
+                # Configurar los encabezados del Treeview
+                for col in columnas_reservas:
+                    tree_reservas.heading(col, text=col)
+                    tree_reservas.column(col, width=100) 
+
+                # Mostrar el DNI, nombre y apellido de cada usuario que reservó el turno
+                for reserva in reservas_turno:
+                    dni_reserva = reserva.usuario_dni  # Suponiendo que 'reserva' tiene un atributo 'usuario_dni'
+
+                    # Buscar el usuario correspondiente en la lista de usuarios por DNI
+                    usuario = next((user for user in usuarios if user.dni == dni_reserva), None)
+                   
+                    # Asegurarse de que se encontró un usuario con el DNI y se inserten los valores correctamente
+                    if usuario:
+                        tree_reservas.insert("", tk.END, values=(usuario.dni, usuario.nombre, usuario.apellido))
+
+                # Mostrar el Treeview en la ventana
+                tree_reservas.pack(fill=tk.BOTH, expand=True)
+
+            
+            
+
             
         def mostrar_ventana_edicion():
             """Muestra la ventana para editar un turno."""
@@ -227,6 +280,9 @@ def pantalla_principal(usuario):
 
         boton_modificacion = tk.Button(frame_botones, text="Editar", command = mostrar_ventana_edicion)
         boton_modificacion.pack(pady=5, fill=tk.X) 
+        
+        boton_detalle = tk.Button(frame_botones, text="Detalles", command = mostrar_reservas)
+        boton_detalle.pack(pady=5, fill=tk.X) 
         
         columns = ("ID", "Nombre", "Instructor", "Horario", "Capacidad", "Fecha")
         tree = ttk.Treeview(pantalla_admin, columns=columns, show="headings")

@@ -4,7 +4,7 @@ usuarios_archivo = 'usuarios.txt'
 turnos_archivo = 'turnos.txt'
 usuarios = []  # Lista global para almacenar los usuarios
 turnos = []  # Lista para guardar los turnos
-reservas = []
+reservas = [] # Lista global para guardar reservas.
 
 class Persona:
     def __init__(self, nombre, apellido, edad, dni, telefono, usuario, contraseña, funcion):
